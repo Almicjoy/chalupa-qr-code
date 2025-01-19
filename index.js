@@ -7,7 +7,7 @@ const { v4: uuidv4 } = require('uuid'); // Import uuidv4
 const app = express();
 const PORT = process.env.PORT ||3001;
 
-app.use(cors({ origin: 'http://localhost:3000' }));
+app.use(cors({ origin: 'https://rotaract-ow-loteria.vercel.app/' }));
 
 let cards = {};
 
