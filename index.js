@@ -35,7 +35,7 @@ app.get("/list-images", (req, res) => {
     }
     const images = files
       .filter((file) => file.endsWith(".jpg") || file.endsWith(".png"))
-      .map((file) => `https://rotaract-loteria-backend-3c90567e12a3.herokuapp.com:${PORT}/images/${file}`);
+      .map((file) => `https://rotaract-loteria-backend-3c90567e12a3.herokuapp.com/images/${file}`);
     res.json(images);
   });
 });
@@ -51,7 +51,7 @@ app.get("/api/generate", (req, res) => {
       }
       const images = files
         .filter((file) => file.endsWith(".jpg") || file.endsWith(".png"))
-        .map((file) => `https://rotaract-loteria-backend-3c90567e12a3.herokuapp.com:${PORT}/images/${file}`);
+        .map((file) => `https://rotaract-loteria-backend-3c90567e12a3.herokuapp.com/images/${file}`);
       
       // Check if images are available before generating the card
       if (!images || images.length === 0) {
