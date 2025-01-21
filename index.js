@@ -2,7 +2,10 @@ const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
+const { Server } = require('ws');
 const { v4: uuidv4 } = require('uuid'); // Import uuidv4
+
+const wss = new Server({ noServer: true });
 
 const app = express();
 const PORT = process.env.PORT ||3001;
@@ -66,14 +69,7 @@ app.get("/api/generate", (req, res) => {
     });
   });
 
-// API to generate a new card and return its ID
-// app.get('/api/generate', (req, res) => {
-//     const id = uuidv4();
-    
-//     const card = generateCard();
-//     cards[id] = card; // Store the card with the ID
-//     res.json({ id, cardUrl: `http://localhost:3000/card/${id}` });
-//   });
+
   
 app.get('/api/card/:id', (req, res) => {
     const { id } = req.params;
@@ -86,8 +82,27 @@ app.get('/api/card/:id', (req, res) => {
     // Respond with the images for the card
     res.json({ images: cards[id] });
 });
+
+// Endpoint to clear all cards
+app.delete("/api/clear-cards", (req, res) => {
+  cards = {}; // Clear all stored cards
+  res.json({ success: true, message: "All cards have been cleared" });
+
+  // Notify all connected clients
+  wss.clients.forEach(client => {
+    if (client.readyState === 1) {
+      client.send(JSON.stringify({ type: "CLEAR_CARDS" }));
+    }
+  });
+});
   
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
+});
+
+server.on('upgrade', (request, socket, head) => {
+  wss.handleUpgrade(request, socket, head, socket => {
+    wss.emit('connection', socket, request);
+  });
 });
