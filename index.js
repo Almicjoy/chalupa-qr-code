@@ -45,29 +45,37 @@ app.get("/list-images", (req, res) => {
 
 // Endpoint to generate a random card
 app.get("/api/generate", (req, res) => {
+  const count = parseInt(req.query.count) || 1; // Default to 1 card if no count is specified
+  if (count < 1 || count > 3) {
+    return res.status(400).json({ error: "Invalid count. Please request between 1 and 3 cards." });
+  }
 
-    const id = uuidv4();
-    const imagesDir = path.join(__dirname, "chalupa-images");
-    fs.readdir(imagesDir, (err, files) => {
-      if (err) {
-        return res.status(500).json({ error: "Unable to read images directory" });
-      }
-      const images = files
-        .filter((file) => file.endsWith(".jpg") || file.endsWith(".png"))
-        .map((file) => `https://rotaract-loteria-backend-3c90567e12a3.herokuapp.com/images/${file}`);
-      
-      // Check if images are available before generating the card
-      if (!images || images.length === 0) {
-        return res.status(500).json({ error: "No images found" });
-      }
+  const id = uuidv4();
+  const imagesDir = path.join(__dirname, "chalupa-images");
   
-      const card = generateCard(images);
+  fs.readdir(imagesDir, (err, files) => {
+    if (err) {
+      return res.status(500).json({ error: "Unable to read images directory" });
+    }
+    const images = files
+      .filter((file) => file.endsWith(".jpg") || file.endsWith(".png"))
+      .map((file) => `https://rotaract-loteria-backend-3c90567e12a3.herokuapp.com/images/${file}`);
+    
+    if (!images || images.length === 0) {
+      return res.status(500).json({ error: "No images found" });
+    }
 
-      cards[id] = card; // Store the card with the ID
-      res.json({ id, cardUrl: `https://rotaract-ow-loteria.vercel.app/card/${id}` });
-    //   res.json({ card });
-    });
+    // Generate the requested number of cards
+    const generatedCards = [];
+    for (let i = 0; i < count; i++) {
+      const card = generateCard(images);
+      generatedCards.push(card);
+    }
+
+    cards[id] = generatedCards; // Store all generated cards under the same ID
+    res.json({ id, cardUrl: `https://rotaract-ow-loteria.vercel.app/card/${id}` });
   });
+});
 
 
   
