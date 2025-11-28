@@ -6,11 +6,17 @@ const { Server } = require('ws');
 const { v4: uuidv4 } = require('uuid'); // Import uuidv4
 
 const wss = new Server({ noServer: true });
+require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT ||3001;
 
-app.use(cors({ origin: 'https://rotaract-ow-loteria.vercel.app' }));
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,  // must NOT be undefined
+    credentials: true,
+  })
+);
 
 let cards = {};
 
@@ -38,7 +44,7 @@ app.get("/list-images", (req, res) => {
     }
     const images = files
       .filter((file) => file.endsWith(".jpg") || file.endsWith(".png"))
-      .map((file) => `${BACKEND_URL}/images/${file}`);
+      .map((file) => `${process.env.BACKEND_URL}/images/${file}`);
     res.json(images);
   });
 });
@@ -59,7 +65,7 @@ app.get("/api/generate", (req, res) => {
     }
     const images = files
       .filter((file) => file.endsWith(".jpg") || file.endsWith(".png"))
-      .map((file) => `${BACKEND_URL}/images/${file}`);
+      .map((file) => `${process.env.BACKEND_URL}/images/${file}`);
     
     if (!images || images.length === 0) {
       return res.status(500).json({ error: "No images found" });
@@ -73,7 +79,7 @@ app.get("/api/generate", (req, res) => {
     }
 
     cards[id] = generatedCards; // Store all generated cards under the same ID
-    res.json({ id, cardUrl: `https://rotaract-ow-loteria.vercel.app/card/${id}` });
+    res.json({ id, cardUrl: `${process.env.FRONTEND_URL}/card/${id}` });
   });
 });
 
